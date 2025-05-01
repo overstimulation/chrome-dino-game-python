@@ -10,7 +10,7 @@ pygame.init()
 # --- Game Constants ---
 WIDTH = 1100  # Window width
 HEIGHT = 600  # Window height
-FPS = 30  # Frames per second
+FPS = 60  # Frames per second
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
