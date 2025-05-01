@@ -41,7 +41,7 @@ class Dinosaur:
             self.jump()
 
         # Loop animation step index
-        if self.step_index >= 10:
+        if self.step_index >= 20:
             self.step_index = 0
 
         # Handle input for jumping, ducking, or running
@@ -65,7 +65,7 @@ class Dinosaur:
 
     # Handle running animation and position
     def run(self):
-        self.sprite = self.run_sprite[self.step_index // 5]
+        self.sprite = self.run_sprite[self.step_index // 10]
         self.dino_hitbox = self.sprite.get_rect()
         self.dino_hitbox.x = self.X_POSITION
         self.dino_hitbox.y = self.Y_POSITION
@@ -73,7 +73,7 @@ class Dinosaur:
 
     # Handle ducking animation and position
     def duck(self):
-        self.sprite = self.duck_sprite[self.step_index // 5]
+        self.sprite = self.duck_sprite[self.step_index // 10]
         self.dino_hitbox = self.sprite.get_rect()
         self.dino_hitbox.x = self.X_POSITION
         self.dino_hitbox.y = self.Y_POSITION_WHILE_DUCKING

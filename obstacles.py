@@ -53,7 +53,7 @@ class Bird(Obstacle):
 
     # Draw the bird with flapping animation
     def draw(self, window):
-        if self.step_index >= 9:
+        if self.step_index >= 20:
             self.step_index = 0
-        window.blit(self.sprite_list[self.step_index // 5], self.rect)
+        window.blit(self.sprite_list[self.step_index // 10], self.rect)
         self.step_index += 1
