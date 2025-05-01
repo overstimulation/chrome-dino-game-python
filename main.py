@@ -1,4 +1,5 @@
 import os
+import random
 
 import pygame
 
@@ -12,6 +13,14 @@ HEIGHT = 600  # Window height
 FPS = 30  # Frames per second
 
 BACKGROUND_COLOUR = (255, 255, 255)  # The white colour
+
+# --- Font Setup ---
+FONT_SIZE = 30
+FONT_COLOUR = (0, 0, 0)
+try:
+    FONT = pygame.font.SysFont(["Courier New", "Consolas", "Lucida Console", "monospace"], FONT_SIZE, bold=True)
+except pygame.error:
+    FONT = pygame.font.SysFont(None, FONT_SIZE, bold=True)
 
 # --- Game Assets ---
 
@@ -167,11 +176,68 @@ class Dinosaur:
             self.jump_velocity = self.JUMP_VELOCITY  # Reset velocity for next jump
 
 
+# --- Cloud Class ---
+class Cloud:
+    def __init__(self):
+        self.x_position = WIDTH + random.randint(800, 1000)  # Start off-screen to the right
+        self.y_position = random.randint(50, 100)  # Random vertical position
+        self.sprite = CLOUD_SPRITE
+        self.width = self.sprite.get_width()
+
+    # Update cloud position
+    def update(self):
+        self.x_position -= game_speed  # Move cloud to the left
+        if self.x_position < -self.width:
+            self.x_position = WIDTH + random.randint(2500, 3000)  # Reset to far right
+            self.y_position = random.randint(50, 100)  # Randomise height
+
+    # Draw the cloud
+    def draw(self, window):
+        window.blit(self.sprite, (self.x_position, self.y_position))
+
+
+# Draw the moving ground background
+def draw_background(window):
+    global x_position_background, y_position_background
+    background_width = TRACK_SPRITE.get_width()
+    window.blit(TRACK_SPRITE, (x_position_background, y_position_background))
+    window.blit(TRACK_SPRITE, (background_width + x_position_background, y_position_background))
+    if x_position_background <= -background_width:
+        window.blit(TRACK_SPRITE, (background_width + x_position_background, y_position_background))
+        x_position_background = 0
+    x_position_background -= game_speed
+
+
+# Count and display the score
+def count_score(window):
+    global score, game_speed
+
+    score += 1  # Increase score
+
+    if score % 100 == 0:
+        game_speed += 1  # Increase speed every 100 points
+
+    score_str = f"{score:06d}"
+    text = FONT.render(f"Score: {score_str}", True, FONT_COLOUR)
+    text_rect = text.get_rect()
+    text_rect.topright = (WIDTH - 40, 40)
+    window.blit(text, text_rect)
+
+
 # --- Main Game Loop ---
 def main(window):
+    global game_speed, x_position_background, y_position_background, score
+
     clock = pygame.time.Clock()  # Game clock
-    game_running = True
+    game_running = True  # Main loop flag
+    game_speed = 14  # Initial game speed
+    score = 0  # Initial score
+
+    x_position_background = 0  # Background X position
+    y_position_background = 380  # Background Y position
+
     player = Dinosaur()  # Create the dinosaur
+    cloud = Cloud()  # Create the cloud
 
     # Main loop
     while game_running:
@@ -186,6 +252,13 @@ def main(window):
         player_input = pygame.key.get_pressed()  # Get keyboard input
         player.draw(window)  # Draw dinosaur
         player.update(player_input)  # Update dinosaur state
+
+        draw_background(window)  # Draw ground
+
+        cloud.draw(window)  # Draw cloud
+        cloud.update()  # Update cloud position
+
+        count_score(window)  # Update and display score
 
         pygame.display.update()  # Refresh display
 
