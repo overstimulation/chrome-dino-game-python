@@ -12,11 +12,14 @@ WIDTH = 1100  # Window width
 HEIGHT = 600  # Window height
 FPS = 30  # Frames per second
 
-BACKGROUND_COLOUR = (255, 255, 255)  # The white colour
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+BACKGROUND_COLOUR = WHITE
 
 # --- Font Setup ---
 FONT_SIZE = 30
-FONT_COLOUR = (0, 0, 0)
+FONT_COLOUR = BLACK
 try:
     FONT = pygame.font.SysFont(["Courier New", "Consolas", "Lucida Console", "monospace"], FONT_SIZE, bold=True)
 except pygame.error:
@@ -237,7 +240,7 @@ class Bird(Obstacle):
         self.type = 0
         super().__init__(sprite, self.type)
         self.rect.y = 250
-        self.index = 0
+        self.step_index = 0
 
     # Draw the bird with flapping animation
     def draw(self, window):
@@ -245,6 +248,40 @@ class Bird(Obstacle):
             self.step_index = 0
         window.blit(self.sprite[self.step_index // 5], self.rect)
         self.step_index += 1
+
+
+# Display the menu before starting or after dying
+def menu(window, death_count):
+    global score
+
+    menu_running = True
+
+    while menu_running:
+        window.fill(BACKGROUND_COLOUR)
+
+        if death_count == 0:
+            text = FONT.render("Press any key to Start", True, BLACK)
+        elif death_count > 0:
+            text = FONT.render("Press any key to Restart", True, BLACK)
+            score_str = FONT.render("Your Score: " + str(score), True, BLACK)
+            score_rect = score_str.get_rect()
+            score_rect.center = (WIDTH // 2, HEIGHT // 2 + 50)
+            window.blit(score_str, score_rect)
+
+        text_rect = text.get_rect()
+        text_rect.center = (WIDTH // 2, HEIGHT // 2)
+        window.blit(text, text_rect)
+        window.blit(DINO_RUN_SPRITES[0], (WIDTH // 2 - 20, HEIGHT // 2 - 140))
+        pygame.display.update()
+
+        # Listen for quit or key press events to exit or restart game
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                menu_running = False
+            if event.type == pygame.KEYDOWN:
+                main(window)
+
+    pygame.quit()  # Quit Pygame
 
 
 # Draw the moving ground background
@@ -283,6 +320,7 @@ def main(window):
     game_running = True  # Main loop flag
     game_speed = 14  # Initial game speed
     score = 0  # Initial score
+    death_count = 0  # Initial death count
 
     x_position_background = 0  # Background X position
     y_position_background = 380  # Background Y position
@@ -320,7 +358,9 @@ def main(window):
             obstacle.update()
             # Check for collision with dinosaur
             if player.dino_hitbox.colliderect(obstacle.rect):
-                pygame.draw.rect(window, (255, 0, 0), player.dino_hitbox, 2)
+                pygame.time.delay(500)  # Pause briefly
+                death_count += 1  # Increment deaths
+                menu(window, death_count)  # Show the menu
 
         draw_background(window)  # Draw ground
 
@@ -336,4 +376,5 @@ def main(window):
 
 # Run the game if this file is executed directly
 if __name__ == "__main__":
+    menu(GAME_WINDOW, death_count=0)
     main(GAME_WINDOW)
