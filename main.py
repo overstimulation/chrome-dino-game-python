@@ -144,6 +144,8 @@ class Dinosaur:
             self.dino_run = False
             self.dino_duck = False
             self.dino_jump = True
+            if JUMP_SOUND:
+                JUMP_SOUND.play()  # Play the jump sound
         elif player_input[pygame.K_DOWN] and not self.dino_jump:
             self.dino_run = False
             self.dino_duck = True
@@ -308,6 +310,8 @@ def count_score(window):
 
     if score % 100 == 0:
         game_speed += 1  # Increase speed every 100 points
+        if SCORE_UP_SOUND:
+            SCORE_UP_SOUND.play()  # Play the score up sound every 100 points
 
     score_str = f"{score:06d}"
     text = FONT.render(f"Score: {score_str}", True, FONT_COLOUR)
@@ -338,7 +342,7 @@ def main(window):
         clock.tick(FPS)  # Maintain FPS
         window.fill(BACKGROUND_COLOUR)  # Fill background
 
-        draw_background(window)
+        draw_background(window)  # Draw background
 
         # Handle window close event
         for event in pygame.event.get():
@@ -365,6 +369,8 @@ def main(window):
             # Pixel-perfect collision check using masks
             offset = (obstacle.rect.x - player.dino_hitbox.x, obstacle.rect.y - player.dino_hitbox.y)
             if player.mask.overlap(obstacle.mask, offset):
+                if DEATH_SOUND:
+                    DEATH_SOUND.play()  # Play the death sound
                 pygame.time.delay(500)  # Pause briefly
                 death_count += 1  # Increment deaths
                 menu(window, death_count)  # Show the menu
