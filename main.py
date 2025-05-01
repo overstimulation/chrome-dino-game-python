@@ -196,6 +196,57 @@ class Cloud:
         window.blit(self.sprite, (self.x_position, self.y_position))
 
 
+# --- Obstacle Classes ---
+class Obstacle:
+    def __init__(self, sprite, type):
+        self.sprite = sprite
+        self.type = type
+        self.rect = self.sprite[self.type].get_rect()
+        self.rect.x = WIDTH
+
+    # Update obstacle position
+    def update(self):
+        self.rect.x -= game_speed
+        if self.rect.x < -self.rect.width:
+            obstacles.pop()
+
+    # Draw the obstacle
+    def draw(self, window):
+        window.blit(self.sprite[self.type], self.rect)
+
+
+# Small cactus obstacle
+class SmallCactus(Obstacle):
+    def __init__(self, sprite):
+        self.type = random.randint(0, 2)
+        super().__init__(sprite, self.type)
+        self.rect.y = 325
+
+
+# Large cactus obstacle
+class LargeCactus(Obstacle):
+    def __init__(self, sprite):
+        self.type = random.randint(0, 2)
+        super().__init__(sprite, self.type)
+        self.rect.y = 300
+
+
+# Bird obstacle
+class Bird(Obstacle):
+    def __init__(self, sprite):
+        self.type = 0
+        super().__init__(sprite, self.type)
+        self.rect.y = 250
+        self.index = 0
+
+    # Draw the bird with flapping animation
+    def draw(self, window):
+        if self.step_index >= 9:
+            self.step_index = 0
+        window.blit(self.sprite[self.step_index // 5], self.rect)
+        self.step_index += 1
+
+
 # Draw the moving ground background
 def draw_background(window):
     global x_position_background, y_position_background
@@ -226,7 +277,7 @@ def count_score(window):
 
 # --- Main Game Loop ---
 def main(window):
-    global game_speed, x_position_background, y_position_background, score
+    global game_speed, x_position_background, y_position_background, score, obstacles
 
     clock = pygame.time.Clock()  # Game clock
     game_running = True  # Main loop flag
@@ -236,6 +287,7 @@ def main(window):
     x_position_background = 0  # Background X position
     y_position_background = 380  # Background Y position
 
+    obstacles = []  # List to hold obstacles
     player = Dinosaur()  # Create the dinosaur
     cloud = Cloud()  # Create the cloud
 
@@ -252,6 +304,23 @@ def main(window):
         player_input = pygame.key.get_pressed()  # Get keyboard input
         player.draw(window)  # Draw dinosaur
         player.update(player_input)  # Update dinosaur state
+
+        # Spawn obstacles if none exist
+        if len(obstacles) == 0:
+            if random.randint(0, 2) == 0:
+                obstacles.append(SmallCactus(SMALL_CACTUS_SPRITES))
+            elif random.randint(0, 2) == 1:
+                obstacles.append(LargeCactus(LARGE_CACTUS_SPRITES))
+            elif random.randint(0, 2) == 2:
+                obstacles.append(Bird(BIRD_SPRITES))
+
+        # Draw and update all obstacles
+        for obstacle in obstacles:
+            obstacle.draw(window)
+            obstacle.update()
+            # Check for collision with dinosaur
+            if player.dino_hitbox.colliderect(obstacle.rect):
+                pygame.draw.rect(window, (255, 0, 0), player.dino_hitbox, 2)
 
         draw_background(window)  # Draw ground
 
