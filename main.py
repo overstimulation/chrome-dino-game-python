@@ -148,13 +148,23 @@ class Dinosaur:
         self.dino_hitbox.y = self.Y_POSITION
         self.step_index += 1
 
-    # Placeholder for ducking logic
+    # Handle ducking animation and position
     def duck(self):
-        pass
+        self.sprite = self.duck_sprite[self.step_index // 5]
+        self.dino_hitbox = self.sprite.get_rect()
+        self.dino_hitbox.x = self.X_POSITION
+        self.dino_hitbox.y = self.Y_POSITION_WHILE_DUCKING
+        self.step_index += 1
 
-    # Placeholder for jumping logic
+    # Handle jumping animation and movement
     def jump(self):
-        pass
+        self.sprite = self.jump_sprite
+        if self.dino_jump:
+            self.dino_hitbox.y -= self.jump_velocity * 4  # Move upwards by current velocity
+            self.jump_velocity -= 0.8  # Apply gravity (reduce velocity)
+        if self.jump_velocity < -self.JUMP_VELOCITY:
+            self.dino_jump = False  # Stop jumping when peak is reached
+            self.jump_velocity = self.JUMP_VELOCITY  # Reset velocity for next jump
 
 
 # --- Main Game Loop ---
