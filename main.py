@@ -120,6 +120,7 @@ class Dinosaur:
         self.dino_hitbox.y = self.Y_POSITION
         self.step_index = 0
         self.jump_velocity = self.JUMP_VELOCITY
+        self.mask = pygame.mask.from_surface(self.sprite)
 
     # Draw the dinosaur
     def draw(self, window):
@@ -151,6 +152,9 @@ class Dinosaur:
             self.dino_run = True
             self.dino_duck = False
             self.dino_jump = False
+
+        # Update mask after sprite changes
+        self.mask = pygame.mask.from_surface(self.sprite)
 
     # Handle running animation and position
     def run(self):
@@ -206,6 +210,7 @@ class Obstacle:
         self.type = type
         self.rect = self.sprite[self.type].get_rect()
         self.rect.x = WIDTH
+        self.mask = pygame.mask.from_surface(self.sprite[self.type])
 
     # Update obstacle position
     def update(self):
@@ -278,10 +283,9 @@ def menu(window, death_count):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 menu_running = False
+                pygame.quit()  # Quit Pygame
             if event.type == pygame.KEYDOWN:
                 main(window)
-
-    pygame.quit()  # Quit Pygame
 
 
 # Draw the moving ground background
@@ -334,6 +338,8 @@ def main(window):
         clock.tick(FPS)  # Maintain FPS
         window.fill(BACKGROUND_COLOUR)  # Fill background
 
+        draw_background(window)
+
         # Handle window close event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -356,13 +362,12 @@ def main(window):
         for obstacle in obstacles:
             obstacle.draw(window)
             obstacle.update()
-            # Check for collision with dinosaur
-            if player.dino_hitbox.colliderect(obstacle.rect):
+            # Pixel-perfect collision check using masks
+            offset = (obstacle.rect.x - player.dino_hitbox.x, obstacle.rect.y - player.dino_hitbox.y)
+            if player.mask.overlap(obstacle.mask, offset):
                 pygame.time.delay(500)  # Pause briefly
                 death_count += 1  # Increment deaths
                 menu(window, death_count)  # Show the menu
-
-        draw_background(window)  # Draw ground
 
         cloud.draw(window)  # Draw cloud
         cloud.update()  # Update cloud position
